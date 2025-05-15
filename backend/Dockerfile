@@ -1,8 +1,10 @@
 FROM golang:latest AS build
 
+WORKDIR /app
+
 RUN groupadd -r appuser && useradd -r -g appuser appuser
 
-WORKDIR /app
+RUN chown -R appuser:appuser /app
 
 COPY go.mod go.sum ./
 
@@ -10,13 +12,13 @@ RUN go mod download
 
 COPY . /app
 
-RUN chown -R appuser:appuser /app
-
-RUN go build -o /app/myapp ./cmd/api
-
+RUN CGO_ENABLED=0 GOOS=linux GOARCH=amd64 \
+    go build -o /app/myapp ./cmd/api
 
 
 FROM alpine:latest
+
+RUN addgroup -S appuser && adduser -S -G appuser appuser
 
 WORKDIR /app
 
