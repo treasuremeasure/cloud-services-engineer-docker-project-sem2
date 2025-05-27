@@ -46,19 +46,14 @@
 
 <script lang="ts">
 import { defineComponent } from 'vue'
-import { AxiosError } from 'axios';
-
+import axios from 'axios'                        
 import Spinner from '@/components/misc/Spinner.vue'
-import Center from '@/components/misc/Center.vue'
-import Alert from '@/components/misc/Alert.vue'
+import Center  from '@/components/misc/Center.vue'
+import Alert   from '@/components/misc/Alert.vue'
 
 export default defineComponent({
   name: 'Login',
-  components: {
-    Spinner,
-    Center,
-    Alert
-  },
+  components: { Spinner, Center, Alert },
   data() {
     return {
       email: '',
@@ -69,40 +64,36 @@ export default defineComponent({
     }
   },
   created() {
-    
-    if(this.$store.state.auth.isLoggedIn) {
-      return this.$router.push('/profile');
+    if (this.$store.state.auth.isLoggedIn) {
+      this.$router.push('/profile')
+      return
     }
-
-    const url = new URL(window.location.href);
-    this.goto = url.searchParams.get('goto') as string;
+    const url = new URL(window.location.href)
+    this.goto = (url.searchParams.get('goto') ?? '') as string
   },
   methods: {
     login() {
-      this.loading = true;
+      this.loading = true
       this.$store.dispatch('login', {
         email: this.email,
         password: this.password
-      }).then((result: any) => {
-        this.$router.push(this.goto || '/');
-      }).catch((error: AxiosError) => {
-
-        if(!error.isAxiosError || !error.response) {
-          this.error = 'Connection error';
+      })
+      .then(() => {
+        this.$router.push(this.goto || '/')
+      })
+      .catch((err: unknown) => {                 
+        if (axios.isAxiosError(err) && err.response) {
+          this.error = err.response.data.detail
         } else {
-          this.error = error.response.data.detail;
+          this.error = 'Connection error'
         }
-
-        this.loading = false;
-
-      });
+        this.loading = false
+      })
     }
   }
 })
 </script>
 
 <style scoped>
-  .card {
-    width: 400px;
-  }
+.card { width: 400px; }
 </style>

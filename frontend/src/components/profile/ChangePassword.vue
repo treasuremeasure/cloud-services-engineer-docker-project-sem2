@@ -60,28 +60,22 @@
 
 <script lang="ts">
 import { defineComponent } from 'vue'
-import { AxiosError } from 'axios';
+import axios from 'axios'                        
+import { AxiosError } from 'axios'
 
-import Spinner from '@/components/misc/Spinner.vue';
-import Center from '@/components/misc/Center.vue';
-import Alert from '@/components/misc/Alert.vue';
+import Spinner from '@/components/misc/Spinner.vue'
+import Center  from '@/components/misc/Center.vue'
+import Alert   from '@/components/misc/Alert.vue'
 
 export default defineComponent({
   name: 'ChangePassword',
-  components: {
-    Spinner,
-    Center,
-    Alert
-  },
-  emits: [
-    'close'
-  ],
+  components: { Spinner, Center, Alert },
+  emits: ['close'],
   data() {
     return {
       oldPassword: '',
       password: '',
       passwordConfirmation: '',
-      error: '',
       loading: false,
       error_message: '',
       success_message: ''
@@ -89,33 +83,35 @@ export default defineComponent({
   },
   methods: {
     handleSubmit() {
-      this.loading = true;
+      this.loading = true
 
       this.$store.dispatch('changePassword', {
         old_password: this.oldPassword,
         new_password: this.password
-      }).then((data: any) => {
-
-        this.success_message = data.detail;
+      })
+      .then((data: any) => {
+        this.success_message = data.detail
         setTimeout(() => {
-          this.$emit('close');
-          this.$router.push('/login');
-        }, 3000);
-
-      }).catch((error: AxiosError) => {
-        if(!error.isAxiosError || !error.response) {
-          this.error_message = 'Connection error';
+          this.$emit('close')
+          this.$router.push('/login')
+        }, 3000)
+      })
+      .catch((err: unknown) => {                 
+        if (axios.isAxiosError(err) && err.response) {
+          this.error_message = err.response.data.detail
         } else {
-          this.error_message = error.response.data.detail;
+          this.error_message = 'Connection error'
         }
-
-      }).finally(() => {
-        this.loading = false;
-      });
+      })
+      .finally(() => {
+        this.loading = false
+      })
     },
     handlePasswordInput() {
-      const confirmationInput = this.$refs.passwordConfirmation as HTMLInputElement;
-      confirmationInput.setCustomValidity(this.password === this.passwordConfirmation ? '' : 'Passwords do not match');
+      const confirmation = this.$refs.passwordConfirmation as HTMLInputElement
+      confirmation.setCustomValidity(
+        this.password === this.passwordConfirmation ? '' : 'Passwords do not match'
+      )
     }
   }
 })

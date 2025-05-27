@@ -20,10 +20,13 @@ class ApiService {
     return this.getCsrfToken(false);
   }
 
-  static async getHeaders(extra: {[name: string]: string} = {}): Promise<AxiosRequestHeaders> {
-    return Object.assign({
+  static async getHeaders(
+    extra: Record<string, string> = {}
+  ): Promise<Record<string, string>> {
+    return {
       'X-CSRFTOKEN': await this.getCsrfToken(),
-    }, extra);
+      ...extra
+    }
   }
 
   static get(url: string, params?: any) {
